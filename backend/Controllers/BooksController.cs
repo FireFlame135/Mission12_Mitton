@@ -15,16 +15,38 @@ namespace BookstoreApi.Controllers
             _context = context;
         }
 
+        // NEW: Endpoint to get a distinct list of categories dynamically
+        [HttpGet("Categories")]
+        public async Task<IActionResult> GetCategories()
+        {
+            var categories = await _context.Books
+                .Where(b => b.Category != null) // Avoid nulls just in case
+                .Select(b => b.Category)
+                .Distinct()
+                .OrderBy(c => c)
+                .ToListAsync();
+
+            return Ok(categories);
+        }
+
+        // UPDATED: Added category parameter for filtering
         [HttpGet]
         public async Task<IActionResult> GetBooks(
             [FromQuery] int page = 1, 
             [FromQuery] int pageSize = 5, 
-            [FromQuery] string sortOrder = "title_asc")
+            [FromQuery] string sortOrder = "title_asc",
+            [FromQuery] string? category = null) 
         {
             // Start with all books
             IQueryable<Book> query = _context.Books;
 
-            // 1. Sorting logic (AI-assisted sorting as per instructions)
+            // 1. Category Filtering
+            if (!string.IsNullOrEmpty(category))
+            {
+                query = query.Where(b => b.Category == category);
+            }
+
+            // 2. Sorting logic
             query = sortOrder switch
             {
                 "title_desc" => query.OrderByDescending(b => b.Title),
@@ -32,10 +54,10 @@ namespace BookstoreApi.Controllers
                 _ => query.OrderBy(b => b.Title) // Default sort
             };
 
-            // 2. Get total count for pagination metadata
+            // 3. Get total count for pagination metadata (adjusts dynamically based on filter!)
             var totalCount = await query.CountAsync();
 
-            // 3. Pagination logic: Skip the previous pages and take the requested amount
+            // 4. Pagination logic: Skip the previous pages and take the requested amount
             var books = await query
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
@@ -53,7 +75,7 @@ namespace BookstoreApi.Controllers
                 })
                 .ToListAsync();
 
-            // 4. Return the data along with pagination metadata so React knows how to build the buttons
+            // 5. Return the data along with pagination metadata
             return Ok(new
             {
                 TotalItems = totalCount,
