@@ -1,32 +1,55 @@
-# Mission 11: Online Bookstore
+# Mission 12: Online Bookstore
 
 **Author:** Tyler Mitton  
-**Course:** IS 413  
+**Course:** IS 413
 
 ## Project Overview
-This project is a full-stack web application designed to manage and display an online bookstore's inventory. It replicates the core foundational features of an e-commerce catalog, complete with a robust backend API and a dynamic frontend interface. 
+Mission 12 is a full-stack bookstore application with a .NET Web API backend and a React frontend. The app serves a SQLite-backed book catalog with server-side pagination, sorting, and category filtering, then layers in a client-side shopping cart experience.
 
-The application connects to a populated SQLite database containing a collection of books, displaying their details (Title, Author, Publisher, ISBN, Category, Page Count, and Price). It features server-side pagination (displaying 5 books per page) and dynamic sorting capabilities to ensure optimal performance and user experience.
+Users can browse books, filter by category, adjust page size, sort by title, add items to cart, and manage cart quantities from a Bootstrap offcanvas cart panel. Cart state is persisted to localStorage so it survives browser refreshes.
 
 ## Tech Stack
-* **Backend:** ASP.NET Core Web API (C#)
-* **Frontend:** React (TypeScript) built with Vite
-* **Database:** SQLite
-* **ORM:** Entity Framework Core (Database-First approach)
-* **Styling:** Bootstrap
+- **Backend:** ASP.NET Core Web API (.NET 10)
+- **Frontend:** React 19 + TypeScript + Vite
+- **Database:** SQLite
+- **ORM:** Entity Framework Core (SQLite provider)
+- **Styling/UI:** Bootstrap 5
 
-## Features
-* **Dynamic Pagination:** Server-side logic to efficiently load books 5 at a time, generating dynamic page links on the frontend.
-* **Custom Sorting:** Users can sort the book catalog alphabetically by title.
-* **Clean Architecture:** Strict separation of concerns between the API and the React client.
+## Mission 12 Features
+- **Server-side pagination:** API returns page metadata and results per page.
+- **Category filtering:** Dynamic category list is loaded from API and used to filter books.
+- **Sorting:** Title ascending/descending sorting through query params.
+- **Responsive catalog UI:** Bootstrap card grid with pagination controls.
+- **Shopping cart offcanvas:** Cart opens from header and supports quantity updates/removal.
+- **Cart persistence:** Cart data is saved in localStorage.
+- **Add-to-cart feedback:** Toast notification confirms added items.
+
+## API Endpoints
+Base URL (dev):
+- `http://localhost:5145`
+- `https://localhost:7145`
+
+Books:
+- `GET /api/Books`
+	- Query params:
+		- `page` (default `1`)
+		- `pageSize` (default `5`)
+		- `sortOrder` (`title_asc` or `title_desc`, default `title_asc`)
+		- `category` (optional)
+- `GET /api/Books/Categories`
+	- Returns distinct, alphabetized categories.
+
+Swagger (Development):
+- `http://localhost:5145/swagger`
+- `https://localhost:7145/swagger`
 
 ## Getting Started
 
 ### Prerequisites
-* [.NET 8 SDK](https://dotnet.microsoft.com/download) (or newer)
-* [Node.js](https://nodejs.org/)
+- [.NET SDK 10](https://dotnet.microsoft.com/download) (or compatible newer SDK)
+- [Node.js](https://nodejs.org/)
 
-### 1. Start the Backend (API)
+### 1. Run the Backend
 From the project root:
 
 ```bash
@@ -35,15 +58,7 @@ dotnet restore
 dotnet run
 ```
 
-Backend URLs (from launch settings):
-* `http://localhost:5145`
-* `https://localhost:7145`
-
-Swagger UI is available in Development mode at:
-* `https://localhost:7145/swagger`
-* `http://localhost:5145/swagger`
-
-### 2. Start the Frontend (React + Vite)
+### 2. Run the Frontend
 Open a second terminal from the project root:
 
 ```bash
@@ -52,34 +67,35 @@ npm install
 npm run dev
 ```
 
-Frontend dev server runs at:
-* `http://localhost:5173`
+Frontend dev server:
+- `http://localhost:5173`
 
-### 3. Verify the App
-1. Confirm the backend is running by opening Swagger.
-2. Confirm the frontend is running at `http://localhost:5173`.
-3. Load the bookstore page and verify books render with pagination.
+### 3. Verify End-to-End Behavior
+1. Open Swagger and confirm API endpoints are available.
+2. Open the frontend and confirm books load.
+3. Test category filter, sorting, and pagination.
+4. Add books to cart and verify totals/quantities update.
+5. Refresh the page and confirm cart contents persist.
 
-## Development Notes
+## Configuration Notes
 
 ### CORS
-The API currently allows frontend origins:
-* `http://localhost:5173`
-* `http://localhost:5174`
+Allowed origins are configured in `backend/Program.cs`:
+- `http://localhost:5173`
+- `http://localhost:5174`
 
-If your frontend runs on a different port, update CORS settings in `backend/Program.cs`.
+If your frontend runs on a different port, add it to the CORS policy.
 
 ### Database
-The SQLite database file is pre-seeded and tracked in this repository:
-* `backend/Bookstore.sqlite`
-
-No migration step is required for standard local development.
+The API uses the SQLite connection string in backend configuration files:
+- `backend/appsettings.json`
+- `backend/appsettings.Development.json`
 
 ## Project Structure
 
 ```text
-Mission11/
-├── backend/   # ASP.NET Core Web API + SQLite/EF Core
+Mission12/
+├── backend/   # ASP.NET Core Web API + EF Core + SQLite
 ├── frontend/  # React + TypeScript + Vite client
 └── README.md
 ```
